@@ -8,6 +8,7 @@ if __name__ == "__main__":
     print("最適化アルゴリズム：ANA/DB")
 
     ies = IESreader()
+    ies.solve_coefficient(1985)
 
     # Initial.set()
 
