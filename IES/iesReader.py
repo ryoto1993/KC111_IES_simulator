@@ -3,9 +3,16 @@
 import csv
 import math
 
+
 class IESreader:
     # IESファイルのパス
     iesFile = "IES/profile.ies"
+    # 照明座標ファイルのパス
+    lightFile = "IES/ies_light.csv"
+    # 照度センサファイルのパス
+    sensorFile = "IES/ies_sensor.csv"
+    # 影響度ファイル
+    coefficientFile = "IES/coefficient.csv"
     # データ部分で光束が記載されている行
     iesLumen = 2
     # データ部分でアングルが記載されている行
@@ -30,6 +37,7 @@ class IESreader:
         self.lumen = 0
 
         self.readCSV()
+        self.make_coefficient()
 
     def readCSV(self):
         # ヘッダ以降のデータが始まる行
@@ -75,19 +83,53 @@ class IESreader:
         print(self.angles)
         print(self.data)
 
+        f.close()
+
     # 距離から影響度を算出するメソッド
     def solve_coefficient(self, dist):
         height = IESreader.height
-        degree = math.degrees(math.atan(height / dist))
+        degree = math.degrees(math.atan(dist / height))
         degree_index = int(degree/5)
-        print(degree)
-        print(degree_index)
 
         floor = degree_index * 5
         sub = float(degree - floor)
 
         lum = float(self.data[degree_index]) + (float(self.data[degree_index+1]) - float(self.data[degree_index]))*sub
-        print(lum)
-        lum *= float(self.lumen)/1000
 
-        print(lum)
+        return lum/((self.height/1000)**2 + (dist/1000)**2) / float(self.data[0])
+
+
+    def make_coefficient(self):
+        f = open(IESreader.coefficientFile, 'w')
+        writer = csv.writer(f, lineterminator='\n')
+
+        lights = [[int(elm) for elm in v] for v in csv.reader(open(IESreader.lightFile, "r"))]
+        sensors = [[int(elm) for elm in v] for v in csv.reader(open(IESreader.sensorFile, "r"))]
+
+        # ライト読み込みとヘッダ記述
+        tmp = ["Light"]
+        for i in range(0, len(lights)):
+            tmp.append("Light" + str(i+1))
+        writer.writerow(tmp)
+
+        # センサ読み込みと影響度計算
+        for i, s in enumerate(sensors):
+            tmp.clear()
+            tmp.append("Sensor" + str(i+1))
+            for l in lights:
+                tmp.append(self.solve_coefficient(self.dist(s, l)))
+            writer.writerow(tmp)
+
+
+
+
+
+        f.close()
+
+    def dist(self, p1, p2):
+        p1x = float(p1[0])
+        p1y = float(p1[1])
+        p2x = float(p2[0])
+        p2y = float(p2[1])
+
+        return math.sqrt((p1x-p2x)**2 + (p1y-p2y)**2)
