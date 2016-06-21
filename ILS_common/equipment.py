@@ -24,7 +24,7 @@ class Light:
         self.objective_cur = 0  # 現在の目的関数値
         self.objective_next = 0  # 次のステップの目的関数値
         self.weight = 0    # 評価値の重み
-        self.shc_weight = 15  # SHCの評価値の重み
+        # self.shc_weight = 15  # SHCの評価値の重み
 
         self.sensor_list = []   # センサリスト
         self.power_meter = []  # 電力計
@@ -94,6 +94,17 @@ class Light:
 
         self.objective_cur = self.power_meter[0].get_power() + self.weight * efunc
 
+    def db_calc_next_objective(self):
+        efunc = 0
+
+        for index, s in enumerate(self.sensor_list):
+            if 0.06 * s.get_illuminance() <= (s.get_illuminance() - s.get_target()) or (
+                            s.get_illuminance() - s.get_target() < 0):
+                if float(s.get_influence()[self.id]) >= 0.02:
+                    efunc += float(s.get_influence()[self.id]) * (s.get_illuminance() - s.get_target()) ** 2
+
+        self.objective_next = self.power_meter[0].get_power() + self.weight * efunc
+
     def calc_next_objective(self):
         efunc = 0
 
@@ -101,17 +112,6 @@ class Light:
             if 0.06 * s.get_illuminance() <= (s.get_illuminance() -s.get_target()) or (s.get_illuminance() - s.get_target() < 0):
                 if self.sensor_rc[index] >= 0.02:
                     efunc += self.sensor_rc[index] * (s.get_illuminance() - s.get_target()) ** 2
-
-        self.objective_next = self.power_meter[0].get_power() + self.weight * efunc
-
-    def db_calc_next_objective(self):
-        efunc = 0
-
-        for index, s in enumerate(self.sensor_list):
-            if 0.06 * s.get_illuminance() <= (s.get_illuminance() - s.get_target()) or (
-                    s.get_illuminance() - s.get_target() < 0):
-                if float(s.get_influence()[index]) >= 0.02:
-                    efunc += float(s.get_influence()[index]) * (s.get_illuminance() - s.get_target()) ** 2
 
         self.objective_next = self.power_meter[0].get_power() + self.weight * efunc
 
@@ -145,9 +145,6 @@ class Light:
         self.neighbor.set_neighbor_design(self.sensor_list, self.sensor_rank)
 
     def set_random_luminosity(self):
-        next_lum = self.lum_cur
-
-        # next_lum += self.lum_MAX * random.randint(self.neighbor.get_lower(), self.neighbor.get_upper()) / 100
         next_lum = self.lum_cur * (100 + random.randint(self.neighbor.get_lower(), self.neighbor.get_upper())) / 100
         if next_lum < self.lum_MIN:
             next_lum = self.lum_MIN
@@ -171,14 +168,17 @@ class Light:
         self.lum_cur = self.lum_bef
 
     def is_rollback(self):
-        # print(self.objective_cur)
-        # print(self.objective_next)
         if self.objective_cur < self.objective_next:
             return True
         else:
             return False
 
     def shc_append_history(self):
+        self.lum_history.append(self.lum_cur - self.lum_bef)
+        for index, s in enumerate(self.sensor_list):
+            self.sensor_history[index].append(s.get_illuminance() - s.get_before())
+
+    def db_append_history(self):
         self.lum_history.append(self.lum_cur - self.lum_bef)
         for index, s in enumerate(self.sensor_list):
             self.sensor_history[index].append(s.get_illuminance() - s.get_before())

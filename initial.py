@@ -7,22 +7,22 @@ from ILS_common.equipment import *
 
 class Initial:
     # 実験名
-    sim_name = "てすと"
+    sim_name = "IES_test"
     # 照明の数
     light = 12
     # センサの数
-    sensor = 65
+    sensor = 63
     # 使用するセンサのリスト
-    sensorConfig = [[26, 500], [32, 300]]
+    sensorConfig = [[51, 500], [13, 300]]
     # 重み
-    weight = 1
+    weight = 15
     # 初期光度値
     initLum = 200
     # 最小，最大光度値a
     minLum = 200
     maxLum = 1200
     # 影響度ファイル
-    coefficient_file = "coefficient/coefficient1_reverse.csv"
+    coefficient_file = "IES/coefficient.csv"
 
     # 設定用変数
     lightList = []

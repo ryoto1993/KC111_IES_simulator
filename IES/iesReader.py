@@ -80,8 +80,8 @@ class IESreader:
         self.data = lines[start_line + IESreader.iesDataLine][:-1].split(' ')
         self.lumen = lines[start_line + IESreader.iesLumen]
 
-        print(self.angles)
-        print(self.data)
+        # print(self.angles)
+        # print(self.data)
 
         f.close()
 
@@ -94,10 +94,9 @@ class IESreader:
         floor = degree_index * 5
         sub = float(degree - floor)
 
-        lum = float(self.data[degree_index]) + (float(self.data[degree_index+1]) - float(self.data[degree_index]))*sub
-
-        return lum/((self.height/1000)**2 + (dist/1000)**2) / float(self.data[0])
-
+        lum = float(self.data[degree_index]) + 5.0*sub
+        print(dist)
+        return lum/((dist/1000)**2) / float(self.data[0]) * 2
 
     def make_coefficient(self):
         f = open(IESreader.coefficientFile, 'w')
@@ -107,7 +106,7 @@ class IESreader:
         sensors = [[int(elm) for elm in v] for v in csv.reader(open(IESreader.sensorFile, "r"))]
 
         # ライト読み込みとヘッダ記述
-        tmp = ["Light"]
+        tmp = [""]
         for i in range(0, len(lights)):
             tmp.append("Light" + str(i+1))
         writer.writerow(tmp)
@@ -117,13 +116,8 @@ class IESreader:
             tmp.clear()
             tmp.append("Sensor" + str(i+1))
             for l in lights:
-                tmp.append(self.solve_coefficient(self.dist(s, l)))
+                tmp.append(str(self.solve_coefficient(self.dist(s, l))))
             writer.writerow(tmp)
-
-
-
-
-
         f.close()
 
     def dist(self, p1, p2):
@@ -132,4 +126,6 @@ class IESreader:
         p2x = float(p2[0])
         p2y = float(p2[1])
 
-        return math.sqrt((p1x-p2x)**2 + (p1y-p2y)**2)
+        d = (p1x-p2x)**2 + (p1y-p2y)**2
+        dist = math.sqrt(d + self.height**2)
+        return dist
