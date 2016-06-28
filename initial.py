@@ -11,7 +11,7 @@ class Initial:
     # 照明の数
     light = 12
     # センサの数
-    sensor = 63
+    sensor = 62
     # 使用するセンサのリスト
     sensorConfig = [[51, 500], [13, 300]]
     # 重み
