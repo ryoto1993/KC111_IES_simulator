@@ -20,7 +20,7 @@ class IESreader:
     # データ部分で光度が記載されている行
     iesDataLine = 16
     # 照明から机上面までの距離
-    height = 1985
+    height = 1985.0
 
     def __init__(self):
         self.profile = ""
@@ -88,14 +88,13 @@ class IESreader:
     # 距離から影響度を算出するメソッド
     def solve_coefficient(self, dist):
         height = IESreader.height
-        degree = math.degrees(math.atan(dist / height))
+        degree = math.degrees(math.atan(float(dist) / float(height)))
         degree_index = int(degree/5)
 
         floor = degree_index * 5
         sub = float(degree - floor)
 
-        lum = float(self.data[degree_index]) + 5.0*sub
-        print(dist)
+        lum = float(self.data[degree_index]) + (sub/5.0) * (float(self.data[degree_index+1])-float(self.data[degree_index]))
         return lum/((dist/1000)**2) / float(self.data[0]) * 2
 
     def make_coefficient(self):
