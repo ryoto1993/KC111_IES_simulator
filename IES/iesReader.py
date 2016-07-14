@@ -20,7 +20,7 @@ class IESreader:
     # データ部分で光度が記載されている行
     iesDataLine = 16
     # 照明から机上面までの距離
-    height = 1985.0
+    height = 1850.0
 
     def __init__(self):
         self.profile = ""
@@ -34,12 +34,12 @@ class IESreader:
         self.tilt = ""
         self.angles = []
         self.data = []
-        self.lumen = 0
+        self.flux = 0
 
-        self.readCSV()
+        self.read_ies()
         self.make_coefficient()
 
-    def readCSV(self):
+    def read_ies(self):
         # ヘッダ以降のデータが始まる行
         start_line = 0
 
@@ -59,17 +59,17 @@ class IESreader:
             elif lines[i].find("[TEST]") > -1:
                 self.test = lines[i][6:]
             elif lines[i].find("[DATE]") > -1:
-                self.test = lines[i][6:]
+                self.date = lines[i][6:]
             elif lines[i].find("[LUMCAT]") > -1:
-                self.test = lines[i][8:]
+                self.lumcat = lines[i][8:]
             elif lines[i].find("[LAMP]") > -1:
-                self.test = lines[i][6:]
+                self.lamp = lines[i][6:]
             elif lines[i].find("[LAMPCAT]") > -1:
-                self.test = lines[i][8:]
+                self.lampcat = lines[i][8:]
             elif lines[i].find("[LUMINAIRE]") > -1:
-                self.test = lines[i][11:]
+                self.luminaire = lines[i][11:]
             elif lines[i].find("TILT") > -1:
-                self.test = lines[i][4:]
+                self.tilt = lines[i][4:]
             else:
                 start_line = i-1
                 break
@@ -78,24 +78,26 @@ class IESreader:
         # ヘッダ以降のデータを読み込む
         self.angles = lines[start_line + IESreader.iesAngleLine][:-1].split(' ')
         self.data = lines[start_line + IESreader.iesDataLine][:-1].split(' ')
-        self.lumen = lines[start_line + IESreader.iesLumen]
-
-        # print(self.angles)
-        # print(self.data)
+        self.flux = float(lines[start_line + IESreader.iesLumen])
 
         f.close()
 
     # 距離から影響度を算出するメソッド
     def solve_coefficient(self, dist):
-        height = IESreader.height
-        degree = math.degrees(math.atan(float(dist) / float(height)))
-        degree_index = int(degree/5)
+        # 直下1mの照度=光度を計算
+        luminance = float(self.data[0]) * self.flux / 1000
 
-        floor = degree_index * 5
+        # 測光点の水平面照度を計算
+        rdegree = math.atan(float(dist) / float(IESreader.height))
+        degree = math.degrees(rdegree)
+        degree_index = int(degree / 5)
+        floor = (degree_index + 1) * 5
         sub = float(degree - floor)
+        raw = float(self.data[degree_index]) + float(sub / 5.0) * (float(self.data[degree_index + 1]) - float(self.data[degree_index]))
+        illuminance = raw * self.flux / 1000 / ((dist/1000)**2 + (IESreader.height/1000)**2) * math.cos(rdegree)
 
-        lum = float(self.data[degree_index]) + (sub/5.0) * (float(self.data[degree_index+1])-float(self.data[degree_index]))
-        return lum/((dist/1000)**2) / float(self.data[0]) * 2
+        # 照度/光度影響度を計算
+        return illuminance/luminance
 
     def make_coefficient(self):
         f = open(IESreader.coefficientFile, 'w')
@@ -126,5 +128,6 @@ class IESreader:
         p2y = float(p2[1])
 
         d = (p1x-p2x)**2 + (p1y-p2y)**2
-        dist = math.sqrt(d + self.height**2)
+        dist = math.sqrt(d)
+
         return dist
