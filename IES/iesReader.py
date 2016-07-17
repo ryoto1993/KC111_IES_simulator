@@ -8,9 +8,9 @@ class IESreader:
     # IESファイルのパス
     iesFile = "IES/profile.ies"
     # 照明座標ファイルのパス
-    lightFile = "IES/ies_light.csv"
+    lightFile = "IES/ies_light_downlight.csv"
     # 照度センサファイルのパス
-    sensorFile = "IES/ies_sensor.csv"
+    sensorFile = "IES/ies_sensor_12island.csv"
     # 影響度ファイル
     coefficientFile = "IES/coefficient.csv"
     # データ部分で光束が記載されている行
@@ -20,7 +20,7 @@ class IESreader:
     # データ部分で光度が記載されている行
     iesDataLine = 16
     # 照明から机上面までの距離
-    height = 1850.0
+    height = 1960.0
 
     def __init__(self):
         self.profile = ""

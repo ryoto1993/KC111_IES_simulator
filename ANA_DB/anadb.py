@@ -19,7 +19,8 @@ class AnaDb:
         date = str(time.day).zfill(2)
         hour = str(time.hour).zfill(2)
         minute = str(time.minute).zfill(2)
-        file_dir = "log/" + year + month + date + "_" + hour + minute + "_" + "DB_" + Initial.sim_name
+        second = str(time.second).zfill(2)
+        file_dir = "log/" + year + month + date + "_" + hour + minute + second + "_" + "DB_" + Initial.sim_name
         os.mkdir(file_dir)
         log_dir = file_dir + "/log.csv"
         ill_log_dir = file_dir + "/ill_log.csv"
@@ -101,6 +102,7 @@ class AnaDb:
             for l in self.lightList:
                 if l.is_rollback():
                     l.rollback()
+
             update_sensors(self.lightList, self.useSensorList)
             for l in self.lightList:
                 if l.is_rollback():
