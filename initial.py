@@ -7,20 +7,22 @@ from ILS_common.equipment import *
 
 class Initial:
     # 実験名
-    sim_name = "IES_test"
+    sim_name = u"ダウンライト_91820FB_al300"
     # 照明の数
-    light = 12
+    light = 80
     # センサの数
-    sensor = 62
+    sensor = 12
     # 使用するセンサのリスト
-    sensorConfig = [[51, 500], [13, 300]]
+    # sensorConfig = [[51, 500], [13, 300]]
+    sensorConfig = [[1, 300], [2, 300], [3, 300], [4, 300], [5, 300], [6, 300],
+                    [7, 300], [8, 300], [9, 300], [10, 300], [11, 300], [12, 300]]
     # 重み
-    weight = 15
+    weight = 15000000
     # 初期光度値
-    initLum = 200
+    initLum = 50
     # 最小，最大光度値a
-    minLum = 200
-    maxLum = 1200
+    minLum = 0
+    maxLum = 1500
     # 影響度ファイル
     coefficient_file = "IES/coefficient.csv"
 
