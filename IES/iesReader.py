@@ -6,9 +6,9 @@ import math
 
 class IESreader:
     # IESファイルのパス
-    iesFile = "IES/91820fb_5700k.ies"
+    iesFile = "IES/BACnet.ies"
     # 照明座標ファイルのパス
-    lightFile = "IES/ies_light_downlight.csv"
+    lightFile = "IES/ies_light_bacnet_60.csv"
     # 照度センサファイルのパス
     sensorFile = "IES/ies_sensor_12island.csv"
     # 影響度ファイル
@@ -16,9 +16,9 @@ class IESreader:
     # データ部分で光束が記載されている行
     iesLumen = 2
     # データ部分でアングルが記載されている行
-    iesAngleLine = 10
+    iesAngleLine = 14
     # データ部分で光度が記載されている行
-    iesDataLine = 12
+    iesDataLine = 16
     # 照明から机上面までの距離
     height = 1960.0
 
